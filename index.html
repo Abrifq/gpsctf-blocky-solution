@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+    <title> blocky challenge text file processor</title>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <label>Insert ALL text files here<input type="file" id="input" multiple onchange="startProcessing();" /></label>
+    <ul id="out">
+        <li>Results will be printed below here.</li>
+    </ul>
+    <script>
+        //@ts-check
+        /**
+         * @param {string} data 
+         * Used to convert text data to RGBA values, then to a PNG and extract the blob out of it.
+         * @returns {Promise<Blob>}
+         */
+        function makeQRCodeFrom(data) {
+            const imgPixelData = new Uint8ClampedArray(
+                data.replace(/\n/g, "")
+                    .split("")
+                    .flatMap(c => c === "1" ? [255, 255, 255, 255] : [0, 0, 0, 255])
+            );
+            const imgData = new ImageData(imgPixelData, 244, 244);
+            const canvas = document.createElement("canvas");
+            canvas.width = canvas.height = 244;
+            canvas.getContext("2d").putImageData(imgData, 0, 0);
+            return new Promise(r => canvas.toBlob(r));
+        }
+
+        /**
+         * @param {string} string 
+         * Used to make ascii string from a "hex" string.
+         */
+        function decodeHexData(string) {
+            const chunks = [];
+            for (let i = 0; i < string.length / 2; i++) chunks.push(string.substr(i * 2, 2));
+            return chunks
+                .map(x => Number.parseInt(x, 16))
+                .map(n => String.fromCodePoint(n))
+                .join("");
+        }
+
+        /**
+         * @param {Blob} image
+         * Sends image file to "https://goqr.me"s api, and gets data*/
+        async function getQRData(image) {
+            const formData = new FormData();
+            formData.set("file", image, "qr.png");
+            return fetch("http://api.qrserver.com/v1/read-qr-code/", { method: "POST", body: formData })
+                .then(resp => resp.json())
+                .then(response => response[0].symbol[0]) /*yeah their response structure sucks a bit*/
+                .then(
+                    /**@param {QRReadResponse} result*/
+                    result =>
+                        result.error ?
+                            result.error :
+                            decodeHexData(result.data));
+        }
+
+        /**@param {string} response */
+        function printQRData(response) {
+            const out = document.createElement("li");
+            out.innerText = response;
+            document.getElementById("out").appendChild(out);
+        }
+        async function startProcessing() {
+            /**@type {HTMLInputElement} */
+            const input = document.getElementById("input");
+            for (const file of input.files) await file
+                .text()
+                .then(makeQRCodeFrom)
+                .then(getQRData)
+                .then(printQRData);
+        }
+
+        /**@typedef {QRReadError | QRReadData} QRReadResponse */
+        /**@typedef {{seq:number,data:null,error:string}} QRReadError */
+        /**@typedef {{seq:number,error:null,data:string}} QRReadData */
+        </script>
+</body>
+
+</html>
