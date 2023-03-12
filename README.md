@@ -7,7 +7,7 @@ To use it:
 
 Then,
 - the page will convert each file to a 244*244 png file,
-- send it to an online qrcode reader api, (thanks, [goqr](https://goqr.me)),
+- send it to an online qrcode reader api, (thanks for having a public api and not automatically ip-blocking me, [goqr](https://goqr.me)),
 - parse the result hex string,
 - and finally, print it on the document.
 
