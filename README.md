@@ -1,6 +1,6 @@
 # GuidePoint Security CTF - Solution for "Blocky"
 
-Visit webpage [on gh pages](https://fbarda.github.io/gpsctf-blocky-solution)
+Visit webpage [on gh pages](https://abrifq.github.io/gpsctf-blocky-solution)
 
 To use it:
 1. extract all files in the zip to a folder, and drag **all** of them to the file input.
