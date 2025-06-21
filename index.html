@@ -51,7 +51,7 @@
         async function getQRData(image) {
             const formData = new FormData();
             formData.set("file", image, "qr.png");
-            return fetch("http://api.qrserver.com/v1/read-qr-code/", { method: "POST", body: formData })
+            return fetch("https://api.qrserver.com/v1/read-qr-code/", { method: "POST", body: formData })
                 .then(resp => resp.json())
                 .then(response => response[0].symbol[0]) /*yeah their response structure sucks a bit*/
                 .then(
